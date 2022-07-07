@@ -279,7 +279,7 @@ func containsJSONNumber(a float64, b interface{}) (bool, error) {
 //   - DOUBLE
 //       JSON values can contain exact-value numbers and approximate-value numbers. For a general discussion of these
 //       types of numbers, see Section 9.1.2, “Numeric Literals”. The rules for comparing native MySQL numeric types are
-//       discussed in Section 12.3, “Type Conversion in Expression Evaluation”, but the rules for comparing numbers
+//       discussed in Section 12.3, “Typ Conversion in Expression Evaluation”, but the rules for comparing numbers
 //       within JSON values differ somewhat:
 //         - In a comparison between two columns that use the native MySQL INT and DOUBLE numeric types, respectively,
 //           it is known that all comparisons involve an integer and a double, so the integer is converted to double for

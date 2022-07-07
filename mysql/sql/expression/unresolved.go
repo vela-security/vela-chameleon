@@ -57,7 +57,7 @@ func (*UnresolvedColumn) IsNullable() bool {
 
 // Type implements the Expression interface.
 func (*UnresolvedColumn) Type() sql.Type {
-	panic("unresolved column is a placeholder node, but Type was called")
+	panic("unresolved column is a placeholder node, but Typ was called")
 }
 
 // Name implements the Nameable interface.
@@ -131,7 +131,7 @@ func (*UnresolvedFunction) IsNullable() bool {
 
 // Type implements the Expression interface.
 func (*UnresolvedFunction) Type() sql.Type {
-	panic("unresolved function is a placeholder node, but Type was called")
+	panic("unresolved function is a placeholder node, but Typ was called")
 }
 
 // Name implements the Nameable interface.

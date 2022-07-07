@@ -1655,7 +1655,7 @@ var systemVars = map[string]SystemVariable{
 	//	Scope: SystemVariableScope_Both,
 	//	Dynamic: true,
 	//	SetVarHintApplies: true,
-	//	Type: NewSystemSetType("optimizer_switch"),
+	//	Typ: NewSystemSetType("optimizer_switch"),
 	//	Default: "",
 	//},
 	"optimizer_trace": {
@@ -1856,7 +1856,7 @@ var systemVars = map[string]SystemVariable{
 	//	Scope: SystemVariableScope_Both,
 	//	Dynamic: true,
 	//	SetVarHintApplies: false,
-	//	Type: NewSystemIntType("query_alloc_block_size", 1024, 4294967295, false),
+	//	Typ: NewSystemIntType("query_alloc_block_size", 1024, 4294967295, false),
 	//	Default: int64(8192),
 	//},
 	"query_cache_size": {
@@ -1880,7 +1880,7 @@ var systemVars = map[string]SystemVariable{
 	//	Scope: SystemVariableScope_Both,
 	//	Dynamic: true,
 	//	SetVarHintApplies: false,
-	//	Type: NewSystemUintType("query_prealloc_size", 8192, 18446744073709551615),
+	//	Typ: NewSystemUintType("query_prealloc_size", 8192, 18446744073709551615),
 	//	Default: uint64(8192),
 	//},
 	"rand_seed1": {
@@ -1897,7 +1897,7 @@ var systemVars = map[string]SystemVariable{
 	//	Scope: SystemVariableScope_Both,
 	//	Dynamic: true,
 	//	SetVarHintApplies: true,
-	//	Type: NewSystemUintType("range_alloc_block_size", 4096, 18446744073709547520),
+	//	Typ: NewSystemUintType("range_alloc_block_size", 4096, 18446744073709547520),
 	//	Default: uint64(4096),
 	//},
 	"range_optimizer_max_mem_size": {
@@ -2562,7 +2562,7 @@ var systemVars = map[string]SystemVariable{
 	//	Scope: SystemVariableScope_Global,
 	//	Dynamic: false,
 	//	SetVarHintApplies: false,
-	//	Type: NewSystemUintType("thread_stack", 131072, 18446744073709551615),
+	//	Typ: NewSystemUintType("thread_stack", 131072, 18446744073709551615),
 	//	Default: uint64(286720),
 	//},
 	"time_zone": {
@@ -2620,7 +2620,7 @@ var systemVars = map[string]SystemVariable{
 	//	Scope: SystemVariableScope_Both,
 	//	Dynamic: true,
 	//	SetVarHintApplies: false,
-	//	Type: NewSystemIntType("transaction_alloc_block_size", 1024, 131072, false),
+	//	Typ: NewSystemIntType("transaction_alloc_block_size", 1024, 131072, false),
 	//	Default: int64(8192),
 	//},
 	"transaction_isolation": {

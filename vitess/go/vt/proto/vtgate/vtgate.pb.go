@@ -1059,7 +1059,7 @@ func (m *ExecuteEntityIdsRequest) GetOptions() *query.ExecuteOptions {
 
 type ExecuteEntityIdsRequest_EntityId struct {
 	// type is the type of the entity's value. Can be NULL_TYPE.
-	Type query.Type `protobuf:"varint,1,opt,name=type,proto3,enum=query.Type" json:"type,omitempty"`
+	Type query.Type `protobuf:"varint,1,opt,name=type,proto3,enum=query.Typ" json:"type,omitempty"`
 	// value is the value for the entity. Not set if type is NULL_TYPE.
 	Value []byte `protobuf:"bytes,2,opt,name=value,proto3" json:"value,omitempty"`
 	// keyspace_id is the associated keyspace_id for the entity.

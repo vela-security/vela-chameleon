@@ -174,7 +174,7 @@ func (c *Conn) readColumnDefinition(field *querypb.Field, index int) error {
 }
 
 // readColumnDefinitionType is a faster version of
-// readColumnDefinition that only fills in the Type.
+// readColumnDefinition that only fills in the Typ.
 // Returns a SQLError.
 func (c *Conn) readColumnDefinitionType(field *querypb.Field, index int) error {
 	colDef, err := c.readEphemeralPacket()

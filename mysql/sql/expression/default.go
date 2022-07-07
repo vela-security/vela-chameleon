@@ -49,7 +49,7 @@ func (*DefaultColumn) IsNullable() bool {
 // Type implements the sql.Expression interface.
 // The function always panics!
 func (*DefaultColumn) Type() sql.Type {
-	panic("default column is a placeholder node, but Type was called")
+	panic("default column is a placeholder node, but Typ was called")
 }
 
 // Name implements the sql.Nameable interface.

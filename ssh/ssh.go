@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 	"github.com/vela-security/vela-public/lua"
-	audit "github.com/vela-security/vela-audit"
+	risk "github.com/vela-security/vela-risk"
 )
 
 type sshGo struct {
@@ -30,13 +30,12 @@ func (s *sshGo) Name() string {
 }
 
 func (s *sshGo) event(ctx Context, pass string, err error) {
-	audit.NewEvent("chameleon").
-		Subject("高交互SSH蜜罐认证失败").
-		From(s.cfg.code).
-		User(ctx.User()).
-		Remote(ctx.RemoteAddr()).
-		Msg("pass: %s", pass).
-		E(err).Alert().High().Put()
+	ev := risk.HoneyPot()
+	ev.Subject = "ssh蜜罐认证失败"
+	ev.From(s.cfg.code)
+	ev.Remote(ctx.RemoteAddr())
+	ev.Payloadf("user:%s pass:%s", ctx.User(), pass)
+	ev.Send()
 }
 
 var (

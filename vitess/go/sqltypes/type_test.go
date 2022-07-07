@@ -122,7 +122,7 @@ func TestTypeValues(t *testing.T) {
 	}}
 	for _, tcase := range testcases {
 		if int(tcase.defined) != tcase.expected {
-			t.Errorf("Type %s: %d, want: %d", tcase.defined, int(tcase.defined), tcase.expected)
+			t.Errorf("Typ %s: %d, want: %d", tcase.defined, int(tcase.defined), tcase.expected)
 		}
 	}
 }

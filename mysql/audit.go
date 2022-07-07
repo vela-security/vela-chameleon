@@ -1,9 +1,9 @@
 package mysql
 
 import (
-	audit "github.com/vela-security/vela-audit"
 	"github.com/vela-security/vela-chameleon/mysql/auth"
 	"github.com/vela-security/vela-chameleon/mysql/sql"
+	risk "github.com/vela-security/vela-risk"
 	"time"
 )
 
@@ -12,19 +12,19 @@ type Audit struct {
 }
 
 func (a *Audit) Authentication(user, addr string, err error) {
-	ev := audit.NewEvent("chameleon").Alert().High().
-		Subject("高交互Mysql蜜罐命中").
-		From(a.CodeVM()).
-		Remote(addr).
-		User(user)
+	ev := risk.HoneyPot()
+	ev.Remote(addr)
+	ev.From(a.CodeVM())
+	ev.Leve(risk.HIGH)
 
 	if err == nil {
-		ev.Msg("honey mysql auth success")
+		ev.Subjectf("mysql蜜罐认证成功")
+		ev.Payloadf("user:%s", user)
 	} else {
-		ev.Msg("honey mysql auth error").E(err)
+		ev.Subjectf("mysql蜜罐认证失败")
+		ev.Payloadf("user:%s err:%v", user, err)
 	}
-
-	ev.Put()
+	ev.Send()
 }
 
 func (a *Audit) Authorization(ctx *sql.Context, p auth.Permission, err error) {

@@ -535,7 +535,7 @@ func rowsAreEqual(ctx *sql.Context, schema sql.Schema, left, right sql.Row) (boo
 			continue
 		}
 
-		// TODO should Type.Compare be used for all columns?
+		// TODO should Typ.Compare be used for all columns?
 		cmp, err := typ.Compare(left[index], right[index])
 		if err != nil {
 			return false, err

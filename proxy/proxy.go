@@ -6,7 +6,7 @@ import (
 	"github.com/vela-security/vela-public/auxlib"
 	"github.com/vela-security/vela-public/kind"
 	"github.com/vela-security/vela-public/lua"
-	audit "github.com/vela-security/vela-audit"
+	risk "github.com/vela-security/vela-risk"
 	"net"
 	"reflect"
 	"time"
@@ -101,53 +101,64 @@ func (p *proxyGo) dail(conn net.Conn) (net.Conn, error) {
 	return d.Dial(p.cur.Remote.Scheme(), fmt.Sprintf("%s:%d", host, port))
 }
 
-func (p *proxyGo) pipe(ev *audit.Event) {
-	n := p.cur.pipe.Len()
-	if n == 0 {
-		ev.Log().Put()
-		return
+func (p *proxyGo) pipe(ev *risk.Event) {
+	if p.cur.log {
+		ev.Log()
 	}
 
 	p.cur.pipe.Do(ev, p.cur.co, func(e error) {
 		xEnv.Errorf("%s pipe call fail %v", p.Name(), e)
 	})
+
+	if p.cur.alert && ev.Alert {
+		ev.Send()
+	}
+
+}
+
+func (p *proxyGo) over(conn net.Conn) *risk.Event {
+	ev := risk.HoneyPot()
+	ev.Alert = false
+	ev.Notice()
+	ev.Subjectf("代理蜜罐请求结束")
+	ev.Remote(conn)
+	ev.From(p.cur.co)
+	return ev
 }
 
 func (p *proxyGo) accept(ctx context.Context, conn net.Conn, stop context.CancelFunc) error {
 
-	ev := audit.NewEvent("chameleon").Alert().High().
-		Subject("高交互代理蜜罐有新的请求").
-		From(p.cur.co.CodeVM()).
-		Remote(conn.RemoteAddr())
+	ev := risk.HoneyPot()
+	ev.From(p.cur.co)
+	ev.Remote(conn.RemoteAddr())
 
 	dst, err := p.dail(conn)
 	if err != nil {
-		ev.Msg("%s 服务端口:%s 后端地址:%s 链接失败", p.Name(), conn.LocalAddr().String(),
-			p.cfg.Remote).E(err)
+		ev.Payloadf("%s 服务端口:%s 后端地址:%s 原因:%v",
+			p.Name(), conn.LocalAddr().String(), p.cfg.Remote, err)
 		p.pipe(ev)
 		return err
 
 	} else {
-		ev.Msg("%s 服务端口:%s 后端地址:%s 链接成功", p.Name(), conn.LocalAddr().String(),
+		ev.Payloadf("%s 服务端口:%s 后端地址:%s 链接成功", p.Name(), conn.LocalAddr().String(),
 			dst.RemoteAddr().String())
 		p.pipe(ev)
 	}
 
-	xEnv.Spawn(50, func() {
+	xEnv.Spawn(20, func() {
 		defer func() {
 			stop()
 			conn.Close()
 		}()
 
 		var toTn int64
-		ev = audit.NewEvent("chameleon").From(p.cur.co.CodeVM()).Remote(conn).Alert().High()
-
+		ev = p.over(conn)
 		toTn, err = auxlib.Copy(ctx, dst, conn)
 		if err != nil {
-			ev.Subject("高交互代理蜜罐关闭请求").Msg("程序名称:%s 代理关闭 发送:%d", p.Name(), toTn).E(err)
+			ev.Payloadf("程序名称:%s 代理 发送:%d 报错:%v", p.Name(), toTn, err)
 			p.pipe(ev)
 		} else {
-			ev.Subject("高交互代理蜜罐请求结束").Msg("程序名称: %s 发送到远程 发送:%d", p.Name(), toTn)
+			ev.Payloadf("程序名称:%s 发送到远程 发送:%d", p.Name(), toTn)
 			p.pipe(ev)
 		}
 	})
@@ -159,15 +170,14 @@ func (p *proxyGo) accept(ctx context.Context, conn net.Conn, stop context.Cancel
 		}()
 		var rev int64
 
-		ev = audit.NewEvent("chameleon").From(p.cur.co.CodeVM()).Remote(conn).Alert().High()
+		ev = p.over(conn)
 		rev, err = auxlib.Copy(ctx, conn, dst)
 		if err != nil {
-			ev.Subject("高交互代理蜜罐关闭请求").Msg("程序名称:%s 接收远程失败:%d", p.Name(), rev).E(err)
+			ev.Payloadf("程序名称:%s 接收远程:%d 报错:%s", p.Name(), rev, err.Error())
 			p.pipe(ev)
 
 		} else {
-			ev.Subject("高交互代理蜜罐请求结束").
-				Msg("程序名称:%s 接收远程结束 数量:%d", p.Name(), rev)
+			ev.Payloadf("程序名称:%s 接收远程:%d", p.Name(), rev)
 			p.pipe(ev)
 		}
 	})

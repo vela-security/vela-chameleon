@@ -73,7 +73,7 @@ func (c *Column) DebugString() string {
 	sb.WriteString("Source: ")
 	sb.WriteString(c.Source)
 	sb.WriteString(", ")
-	sb.WriteString("Type: ")
+	sb.WriteString("Typ: ")
 	sb.WriteString(c.Type.String())
 	sb.WriteString(", ")
 	sb.WriteString("PrimaryKey: ")

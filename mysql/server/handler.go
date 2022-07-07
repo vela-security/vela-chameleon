@@ -17,7 +17,7 @@ package server
 import (
 	"github.com/opentracing/opentracing-go"
 	"github.com/vela-security/vela-public/assert"
-	audit "github.com/vela-security/vela-audit"
+	risk "github.com/vela-security/vela-risk"
 	"gopkg.in/src-d/go-errors.v1"
 	"io"
 	"net"
@@ -81,11 +81,11 @@ func (h *Handler) SetCodeVM(fn func() string) {
 
 // NewConnection reports that a new connection has been established.
 func (h *Handler) NewConnection(c *mysql.Conn) {
-	audit.NewEvent("chameleon").Alert().High().
-		From(h.CodeVM()).
-		Subject("高交互Mysql蜜罐有新的请求").
-		Remote(c.Conn.RemoteAddr()).
-		Msg("client id: %d", c.ConnectionID).Put()
+	ev := risk.HoneyPot()
+	ev.Subjectf("高交互Mysql蜜罐有新的请求")
+	ev.Payloadf("user:%s client:%d", c.User, c.ConnectionID)
+	ev.From(h.CodeVM())
+	ev.Send()
 }
 
 func (h *Handler) ComInitDB(c *mysql.Conn, schemaName string) error {
@@ -116,21 +116,20 @@ func (h *Handler) ComResetConnection(c *mysql.Conn) {
 func (h *Handler) ConnectionClosed(c *mysql.Conn) {
 	ctx, _ := h.sm.NewContextWithQuery(c, "")
 	h.sm.CloseConn(c)
-	ev := audit.NewEvent("chameleon").Alert().High().
-		Subject("高交互Mysql蜜罐关闭请求").
-		From(h.CodeVM()).
-		Remote(c.Conn.RemoteAddr())
+	ev := risk.HoneyPot()
+	ev.Subject = "高交互Mysql蜜罐关闭请求"
+	ev.Alert = false
+	ev.FromCode = h.CodeVM()
+	ev.Remote(c.Conn.RemoteAddr())
 
 	// If connection was closed, kill its associated queries.
 	h.e.Catalog.ProcessList.Kill(c.ConnectionID)
 	if err := h.e.Catalog.UnlockTables(ctx, c.ConnectionID); err != nil {
-		ev.Msg("unable to unlock tables on session close")
-		ev.E(err).Put()
-		return
+		ev.Payloadf("user:%s fail:%v", c.User, err)
+	} else {
+		ev.Payloadf("user:%s client: %d close succeed", c.User, c.ConnectionID)
 	}
-
-	ev.Msg("client id: %d close succeed", c.ConnectionID).Put()
-
+	ev.Send()
 }
 
 // ComQuery executes a SQL query on the SQLe engine.
@@ -258,17 +257,18 @@ func (h *Handler) doQuery(
 	var err error
 
 	defer func() {
-		ev := audit.NewEvent("chameleon").Alert().High().
-			Subject("高交互Mysql蜜罐新的查询").
-			From(h.CodeVM()).
-			User(c.User).
-			Remote(c.Conn.RemoteAddr()).
-			Msg("%s", query)
+		ev := risk.NewEv()
+		ev.From(h.CodeVM())
+		ev.High()
+		ev.Remote(c.Conn)
 		if err != nil {
-			ev.E(err).Put()
-		} else {
-			ev.Put()
+			ev.Subjectf("高交互Mysql蜜罐查询失败")
+			ev.Payloadf("user:%s query:%s fail:%v", c.User, query, err)
+			return
 		}
+		ev.Subjectf("高交互Mysql蜜罐查询成功")
+		ev.Payloadf("user:%s query:%s", query)
+		ev.Send()
 	}()
 
 	var handled bool
@@ -631,7 +631,6 @@ func (h *Handler) handleKill(conn *mysql.Conn, query string) (bool, error) {
 	connID := uint32(id)
 	h.e.Catalog.Kill(connID)
 	if s[1] != "query" {
-		assert.GxEnv().Infof("kill connection: id %d", connID)
 		h.sm.CloseConn(conn)
 		conn.Close()
 	}

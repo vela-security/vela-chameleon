@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	audit "github.com/vela-security/vela-audit"
+	risk "github.com/vela-security/vela-risk"
 	"net"
 	"sync"
 	"time"
@@ -238,12 +238,16 @@ func (srv *Server) Serve(l net.Listener) error {
 	defer srv.trackListener(l, false)
 	for {
 		conn, e := l.Accept()
-		ev := audit.NewEvent("chameleon").Subject("高交互SSH蜜罐有新的请求").From(srv.CodeVM()).Alert().High()
+		ev := risk.HoneyPot()
+		ev.Subject = "ssh蜜罐有新的请求"
+		ev.From(srv.CodeVM())
 
 		if e != nil {
 			if conn != nil {
-				ev.Remote(conn.RemoteAddr()).Msg("honey ssh %s -> %s ",
-					conn.RemoteAddr().String(), conn.LocalAddr().String())
+				ev.Remote(conn.RemoteAddr())
+				ev.Local(conn.LocalAddr())
+				ev.Payloadf("fail:%v", e)
+				ev.Send()
 			}
 
 			select {
@@ -263,14 +267,12 @@ func (srv *Server) Serve(l net.Listener) error {
 				time.Sleep(tempDelay)
 				continue
 			}
-
-			ev.E(e).Put()
-
 			return e
 		}
 
-		ev.Remote(conn.RemoteAddr()).
-			Msg("honey ssh %s -> %s ", conn.RemoteAddr().String(), conn.LocalAddr().String()).Put()
+		ev.Remote(conn.RemoteAddr())
+		ev.Local(conn.LocalAddr())
+		ev.Send()
 		go srv.HandleConn(conn)
 	}
 }

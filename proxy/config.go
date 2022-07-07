@@ -12,9 +12,10 @@ type config struct {
 	Name   string
 	Bind   auxlib.URL
 	Remote auxlib.URL
-
-	pipe *pipe.Px
-	co   *lua.LState
+	alert  bool
+	log    bool
+	pipe   *pipe.Px
+	co     *lua.LState
 }
 
 func newConfig(L *lua.LState) *config {
@@ -24,6 +25,10 @@ func newConfig(L *lua.LState) *config {
 		switch k {
 		case "name":
 			cfg.Name = auxlib.CheckProcName(v, L)
+		case "alert":
+			cfg.alert = lua.IsTrue(v)
+		case "log":
+			cfg.log = lua.IsTrue(v)
 		case "bind":
 			cfg.Bind = auxlib.CheckURL(v, L)
 		case "remote":

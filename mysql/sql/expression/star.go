@@ -54,7 +54,7 @@ func (*Star) IsNullable() bool {
 
 // Type implements the Expression interface.
 func (*Star) Type() sql.Type {
-	panic("star is just a placeholder node, but Type was called")
+	panic("star is just a placeholder node, but Typ was called")
 }
 
 func (s *Star) String() string {

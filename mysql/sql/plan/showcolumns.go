@@ -31,7 +31,7 @@ type ShowColumns struct {
 var (
 	showColumnsSchema = sql.Schema{
 		{Name: "Field", Type: sql.LongText},
-		{Name: "Type", Type: sql.LongText},
+		{Name: "Typ", Type: sql.LongText},
 		{Name: "Null", Type: sql.LongText},
 		{Name: "Key", Type: sql.LongText},
 		{Name: "Default", Type: sql.LongText, Nullable: true},
@@ -40,7 +40,7 @@ var (
 
 	showColumnsFullSchema = sql.Schema{
 		{Name: "Field", Type: sql.LongText},
-		{Name: "Type", Type: sql.LongText},
+		{Name: "Typ", Type: sql.LongText},
 		{Name: "Collation", Type: sql.LongText, Nullable: true},
 		{Name: "Null", Type: sql.LongText},
 		{Name: "Key", Type: sql.LongText},

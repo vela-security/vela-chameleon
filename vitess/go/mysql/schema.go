@@ -49,7 +49,7 @@ var DescribeTableFields = []*querypb.Field{
 		Flags:        uint32(querypb.MySqlFlag_NOT_NULL_FLAG),
 	},
 	{
-		Name:         "Type",
+		Name:         "Typ",
 		Type:         querypb.Type_TEXT,
 		Table:        "COLUMNS",
 		OrgTable:     "COLUMNS",

@@ -7,7 +7,7 @@ import (
 	"github.com/vela-security/vela-public/auxlib"
 	"github.com/vela-security/vela-public/kind"
 	"github.com/vela-security/vela-public/lua"
-	audit "github.com/vela-security/vela-audit"
+	risk "github.com/vela-security/vela-risk"
 	"net"
 	"reflect"
 )
@@ -48,16 +48,18 @@ func (st *stream) socket(conn net.Conn) (assert.HTTPStream, error) {
 	})
 }
 
-func (st *stream) pipe(ev *audit.Event) {
-	n := st.cur.pipe.Len()
-	if n == 0 {
-		ev.Put()
-		return
+func (st *stream) pipe(ev *risk.Event) {
+	if st.cur.log {
+		ev.Log()
 	}
 
 	st.cur.pipe.Do(ev, st.cur.co, func(e error) {
 		xEnv.Errorf("%s stream pipe fail %v", st.Name(), e)
 	})
+
+	if st.cur.alert && ev.Alert {
+		ev.Send()
+	}
 }
 
 func (st *stream) Code() string {
@@ -69,11 +71,12 @@ func (st *stream) accept(ctx context.Context, conn net.Conn, stop context.Cancel
 	bind := st.cur.bind.String()
 	remote := st.cur.remote.String()
 
-	ev := audit.NewEvent("chameleon").Alert().High().
-		Subject("流式高交互代理蜜罐名命中").
-		From(st.Code()).
-		Remote(conn.RemoteAddr()).
-		Msg("connect %s %s => %s succeed", st.Name(), bind, remote)
+	ev := risk.HoneyPot()
+	ev.From(st.CodeVM())
+	ev.Remote(conn.RemoteAddr())
+	ev.Local(conn.LocalAddr())
+	ev.Subjectf("流式代理蜜罐命中")
+	ev.Payload = bind
 	st.pipe(ev)
 
 	var toTn int64
@@ -87,37 +90,14 @@ func (st *stream) accept(ctx context.Context, conn net.Conn, stop context.Cancel
 	//数据通道
 	var socket assert.HTTPStream
 	socket, err = st.socket(conn)
-	ev = audit.NewEvent("chameleon").From(st.Code()).Remote(conn.RemoteAddr()).Alert().High().
-		Msg("connect %s %s => %s succeed", st.Name(), bind, remote)
-
-	if err != nil {
-		ev.Subject("流式高交互代理蜜罐恶意请求失败").E(err)
-		st.pipe(ev)
-		return err
-	} else {
-		ev.Subject("流式高交互代理蜜罐恶意请求成功").E(err)
-		st.pipe(ev)
-	}
 
 	xEnv.Spawn(0, func() {
 		defer func() {
 			stop()
 			conn.Close()
 		}()
-
-		ev = audit.NewEvent("chameleon").From(st.Code()).Remote(conn.RemoteAddr()).Alert().High()
-
 		toTn, err = auxlib.Copy(ctx, socket, conn)
-		if err != nil {
-			ev.Subject("流式高交互代理蜜罐上游请求关闭").E(err).
-				Msg("connect upstream %s %s => %s succeed send:%d", st.Name(), bind, remote, toTn)
-			st.pipe(ev)
-
-		} else {
-			ev.Subject("流式高交互代理蜜罐上游请求结束").
-				Msg("connect upstream %s %s => %s succeed send:%d", st.Name(), bind, remote, toTn)
-			st.pipe(ev)
-		}
+		xEnv.Infof("stream %s proxy send %v data:%d", st.Name(), remote, toTn)
 	})
 
 	xEnv.Spawn(0, func() {
@@ -126,17 +106,8 @@ func (st *stream) accept(ctx context.Context, conn net.Conn, stop context.Cancel
 			socket.Close()
 		}()
 
-		ev = audit.NewEvent("chameleon").From(st.Code()).Remote(conn).Alert().High()
 		rev, err = auxlib.Copy(ctx, conn, socket)
-		if err != nil {
-			ev.Subject("流式高交互代理蜜罐请求关闭").
-				Msg("程序名称: %s \n接收远程失败:%d", st.Name(), rev).E(err)
-			st.pipe(ev)
-		} else {
-			ev.Subject("流式高交互代理蜜罐请求结束").
-				Msg("程序名称: %s 接收远程结束 数量:%d", st.Name(), rev)
-			st.pipe(ev)
-		}
+		xEnv.Infof("stream %s proxy recv  %s data:%d", st.Name(), remote, rev)
 	})
 
 	return err

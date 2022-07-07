@@ -23,7 +23,7 @@ import (
 )
 
 // This file provides wrappers and support
-// functions for querypb.Type.
+// functions for querypb.Typ.
 
 // These bit flags can be used to query on the
 // common properties of types.
@@ -36,7 +36,7 @@ const (
 	flagIsBinary   = int(querypb.Flag_ISBINARY)
 )
 
-// IsIntegral returns true if querypb.Type is an integral
+// IsIntegral returns true if querypb.Typ is an integral
 // (signed/unsigned) that can be represented using
 // up to 64 binary bits.
 // If you have a Value object, use its member function.
@@ -44,38 +44,38 @@ func IsIntegral(t querypb.Type) bool {
 	return int(t)&flagIsIntegral == flagIsIntegral
 }
 
-// IsSigned returns true if querypb.Type is a signed integral.
+// IsSigned returns true if querypb.Typ is a signed integral.
 // If you have a Value object, use its member function.
 func IsSigned(t querypb.Type) bool {
 	return int(t)&(flagIsIntegral|flagIsUnsigned) == flagIsIntegral
 }
 
-// IsUnsigned returns true if querypb.Type is an unsigned integral.
+// IsUnsigned returns true if querypb.Typ is an unsigned integral.
 // Caution: this is not the same as !IsSigned.
 // If you have a Value object, use its member function.
 func IsUnsigned(t querypb.Type) bool {
 	return int(t)&(flagIsIntegral|flagIsUnsigned) == flagIsIntegral|flagIsUnsigned
 }
 
-// IsFloat returns true is querypb.Type is a floating point.
+// IsFloat returns true is querypb.Typ is a floating point.
 // If you have a Value object, use its member function.
 func IsFloat(t querypb.Type) bool {
 	return int(t)&flagIsFloat == flagIsFloat
 }
 
-// IsQuoted returns true if querypb.Type is a quoted text or binary.
+// IsQuoted returns true if querypb.Typ is a quoted text or binary.
 // If you have a Value object, use its member function.
 func IsQuoted(t querypb.Type) bool {
 	return (int(t)&flagIsQuoted == flagIsQuoted) && t != Bit
 }
 
-// IsText returns true if querypb.Type is a text.
+// IsText returns true if querypb.Typ is a text.
 // If you have a Value object, use its member function.
 func IsText(t querypb.Type) bool {
 	return int(t)&flagIsText == flagIsText
 }
 
-// IsBinary returns true if querypb.Type is a binary.
+// IsBinary returns true if querypb.Typ is a binary.
 // If you have a Value object, use its member function.
 func IsBinary(t querypb.Type) bool {
 	return int(t)&flagIsBinary == flagIsBinary
@@ -87,11 +87,11 @@ func isNumber(t querypb.Type) bool {
 }
 
 // Vitess data types. These are idiomatically
-// named synonyms for the querypb.Type values.
+// named synonyms for the querypb.Typ values.
 // Although these constants are interchangeable,
-// they should be treated as different from querypb.Type.
+// they should be treated as different from querypb.Typ.
 // Use the synonyms only to refer to the type in Value.
-// For proto variables, use the querypb.Type constants
+// For proto variables, use the querypb.Typ constants
 // instead.
 // The following conditions are non-overlapping
 // and cover all types: IsSigned(), IsUnsigned(),

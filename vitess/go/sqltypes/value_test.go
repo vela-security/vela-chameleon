@@ -301,7 +301,7 @@ func TestInterfaceValue(t *testing.T) {
 func TestAccessors(t *testing.T) {
 	v := TestValue(Int64, "1")
 	if v.Type() != Int64 {
-		t.Errorf("v.Type=%v, want Int64", v.Type())
+		t.Errorf("v.Typ=%v, want Int64", v.Type())
 	}
 	if !bytes.Equal(v.Raw(), []byte("1")) {
 		t.Errorf("v.Raw=%s, want 1", v.Raw())

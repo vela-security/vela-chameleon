@@ -24,7 +24,6 @@ func (p *proxyGo) Index(L *lua.LState, key string) lua.LValue {
 		return L.NewFunction(p.pipeL)
 	case "start":
 		return L.NewFunction(p.startL)
-
 	}
 
 	return lua.LNil

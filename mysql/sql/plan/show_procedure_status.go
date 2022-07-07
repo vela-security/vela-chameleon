@@ -29,7 +29,7 @@ var _ sql.Node = (*ShowProcedureStatus)(nil)
 var showProcedureStatusSchema = sql.Schema{
 	&sql.Column{Name: "Db", Type: sql.LongText, Nullable: false},
 	&sql.Column{Name: "Name", Type: sql.LongText, Nullable: false},
-	&sql.Column{Name: "Type", Type: sql.LongText, Nullable: false},
+	&sql.Column{Name: "Typ", Type: sql.LongText, Nullable: false},
 	&sql.Column{Name: "Definer", Type: sql.LongText, Nullable: false},
 	&sql.Column{Name: "Modified", Type: sql.Datetime, Nullable: false},
 	&sql.Column{Name: "Created", Type: sql.Datetime, Nullable: false},
@@ -91,7 +91,7 @@ func (s *ShowProcedureStatus) RowIter(ctx *sql.Context, row sql.Row) (sql.RowIte
 		rows = append(rows, sql.Row{
 			s.db.Name(),                // Db
 			procedure.Name,             // Name
-			"PROCEDURE",                // Type
+			"PROCEDURE",                // Typ
 			procedure.Definer,          // Definer
 			procedure.ModifiedAt.UTC(), // Modified
 			procedure.CreatedAt.UTC(),  // Created

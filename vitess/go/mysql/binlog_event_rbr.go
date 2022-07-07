@@ -330,7 +330,7 @@ func printTimestamp(v uint32) *bytes.Buffer {
 }
 
 // CellValue returns the data for a cell as a sqltypes.Value, and how
-// many bytes it takes. It only uses the querypb.Type value for the
+// many bytes it takes. It only uses the querypb.Typ value for the
 // signed flag.
 func CellValue(data []byte, pos int, typ byte, metadata uint16, styp querypb.Type) (sqltypes.Value, int, error) {
 	switch typ {

@@ -12,8 +12,10 @@ type config struct {
 	bind   auxlib.URL
 	remote auxlib.URL
 
-	pipe *pipe.Px
-	co   *lua.LState
+	alert bool
+	log   bool
+	pipe  *pipe.Px
+	co    *lua.LState
 }
 
 func newConfig(L *lua.LState) *config {

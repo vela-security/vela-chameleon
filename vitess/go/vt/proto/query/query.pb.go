@@ -704,7 +704,7 @@ func (m *EventToken) GetPosition() string {
 
 // Value represents a typed value.
 type Value struct {
-	Type                 Type     `protobuf:"varint,1,opt,name=type,proto3,enum=query.Type" json:"type,omitempty"`
+	Type                 Type     `protobuf:"varint,1,opt,name=type,proto3,enum=query.Typ" json:"type,omitempty"`
 	Value                []byte   `protobuf:"bytes,2,opt,name=value,proto3" json:"value,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
@@ -752,7 +752,7 @@ func (m *Value) GetValue() []byte {
 
 // BindVariable represents a single bind variable in a Query.
 type BindVariable struct {
-	Type  Type   `protobuf:"varint,1,opt,name=type,proto3,enum=query.Type" json:"type,omitempty"`
+	Type  Type   `protobuf:"varint,1,opt,name=type,proto3,enum=query.Typ" json:"type,omitempty"`
 	Value []byte `protobuf:"bytes,2,opt,name=value,proto3" json:"value,omitempty"`
 	// values are set if type is TUPLE.
 	Values               []*Value `protobuf:"bytes,3,rep,name=values,proto3" json:"values,omitempty"`
@@ -980,7 +980,7 @@ type Field struct {
 	// name of the field as returned by mysql C API
 	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
 	// vitess-defined type. Conversion function is in sqltypes package.
-	Type Type `protobuf:"varint,2,opt,name=type,proto3,enum=query.Type" json:"type,omitempty"`
+	Type Type `protobuf:"varint,2,opt,name=type,proto3,enum=query.Typ" json:"type,omitempty"`
 	// Remaining fields from mysql C API.
 	// These fields are only populated when ExecuteOptions.included_fields
 	// is set to IncludedFields.ALL.
@@ -4193,7 +4193,7 @@ func (m *TransactionMetadata) GetParticipants() []*Target {
 func init() {
 	proto.RegisterEnum("query.MySqlFlag", MySqlFlag_name, MySqlFlag_value)
 	proto.RegisterEnum("query.Flag", Flag_name, Flag_value)
-	proto.RegisterEnum("query.Type", Type_name, Type_value)
+	proto.RegisterEnum("query.Typ", Type_name, Type_value)
 	proto.RegisterEnum("query.TransactionState", TransactionState_name, TransactionState_value)
 	proto.RegisterEnum("query.ExecuteOptions_IncludedFields", ExecuteOptions_IncludedFields_name, ExecuteOptions_IncludedFields_value)
 	proto.RegisterEnum("query.ExecuteOptions_Workload", ExecuteOptions_Workload_name, ExecuteOptions_Workload_value)

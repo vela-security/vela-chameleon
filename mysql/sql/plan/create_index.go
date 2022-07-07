@@ -16,7 +16,7 @@ package plan
 
 import (
 	"fmt"
-	audit "github.com/vela-security/vela-audit"
+	risk "github.com/vela-security/vela-risk"
 	"strings"
 	"time"
 
@@ -178,11 +178,14 @@ func (c *CreateIndex) RowIter(ctx *sql.Context, row sql.Row) (sql.RowIter, error
 		return nil, err
 	}
 
-	audit.NewEvent("chameleon").Alert().High().
-		Subject("高交互Mysql蜜罐查询记录").
-		User(ctx.Session.Client().User).
-		Remote(ctx.Client().Address).
-		Msg("id: %s , driver:%s", index.ID(), index.Driver()).Put()
+	ev := risk.HoneyPot()
+	ev.Subject = "高交互Mysql蜜罐查询记录"
+	ev.Alert = false
+	ev.Middle()
+	ev.Remote(ctx.Client().Address)
+	ev.Payloadf("client:%d database:%s table:%s driver:%s",
+		index.ID(), index.Database(), index.Table(), index.Driver())
+	ev.Send()
 
 	createIndex := func() {
 		c.createIndex(ctx, driver, index, iter, created, ready)
